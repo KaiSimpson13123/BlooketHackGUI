@@ -159,7 +159,7 @@ guiRun()
             bodyDiv.appendChild(footer);
             footer.style.fontSize = '0.9rem';
             footer.style.paddingBottom = '5px';
-            footer.innerHTML = (`<span>By <span style="color: red;">Kai</span><br>v1.0</span>`);
+            footer.innerHTML = (`<span>By <span style="color: red;">Kai</span><br>v1.0.1</span>`);
 
             var getValues = () => new Promise((e, t) => {
                 try {
@@ -363,28 +363,6 @@ guiRun()
                     },
                     'Remove Hack': () => {
                         reactHandler().stateNode.setState({ hack: '' })
-                    },
-                    'Reset Player\'s Crypto': () => {
-                        let target = prompt("Name of player");
-                        let e = reactHandler();
-                        !target || e.memoizedProps.firebase.getDatabaseVal(e.memoizedProps.client.hostId, "c", (...o) => {
-                            let data = Object.keys(o[0]);
-                            if (data.some(e => e == target)) data.forEach(player => {
-                                if (player == target) {
-                                    e.memoizedProps.firebase.setVal({
-                                        id: e.memoizedProps.client.hostId,
-                                        path: "c/" + e.memoizedProps.client.name,
-                                        val: {
-                                            p: e.stateNode.state.password,
-                                            b: e.memoizedProps.client.blook,
-                                            cr: e.stateNode.state.crypto,
-                                            tat: player + ":" + (o[0][player].cr || 0)
-                                        }
-                                    }); alert('Reset player\'s crypto')
-                                };
-                            });
-                            else alert("Player does not exist");
-                        })
                     }
                 },
                 factory: {
