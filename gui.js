@@ -50,7 +50,7 @@ guiRun()
             GUI.style.width = '400px';
             //GUI.style.height = '500px';
             GUI.style.background = 'rgba(0, 0, 0, .7)';
-            GUI.style.borderRadius = '10px';
+            GUI.style.borderRadius = '15px';
             GUI.style.position = 'absolute';
             GUI.style.textAlign = 'center';
             GUI.style.fontFamily = 'Nunito';
@@ -159,7 +159,7 @@ guiRun()
             bodyDiv.appendChild(footer);
             footer.style.fontSize = '0.9rem';
             footer.style.paddingBottom = '5px';
-            footer.innerHTML = (`<span>By <span style="color: red;">Kai</span><br>v1.0.1</span>`);
+            footer.innerHTML = (`<span>By <span style="color: red;">Kai</span><br>v1.1.0</span>`);
 
             var getValues = () => new Promise((e, t) => {
                 try {
@@ -190,118 +190,13 @@ guiRun()
 
             let cheats = {
                 global: {
-                    'Get Daily Rewards': () => {
-                        fetch("https://api.blooket.com/api/users", { credentials: "include" }).then(x => x.json()).then(x => {
-                            getValues().then(async e => {
-                                fetch("https://api.blooket.com/api/users/add-rewards", {
-                                    method: "put",
-                                    credentials: "include",
-                                    headers: {
-                                        "content-type": "application/json",
-                                        "X-Blooket-Build": e.blooketBuild
-                                    },
-                                    body: await encodeValues({
-                                        name: x.name,
-                                        addedTokens: 250,
-                                        addedXp: 300
-                                    }, e.secret)
-                                });
-                                fetch("https://api.blooket.com/api/users/add-rewards", {
-                                    method: "put",
-                                    credentials: "include",
-                                    headers: {
-                                        "content-type": "application/json",
-                                        "X-Blooket-Build": e.blooketBuild
-                                    },
-                                    body: await encodeValues({
-                                        name: x.name,
-                                        addedTokens: 250,
-                                        addedXp: 300
-                                    }, e.secret)
-                                }).then(() => alert('Added daily rewawrds!')).catch(() => alert('There was an error when adding rewards!'));;
-                            }).catch(() => alert('There was an error encoding requests!'));
-                        }).catch(() => alert('There was an error getting username!'));
-                    },
                     'Spoof Blooks': () => {
                         if (!window.location.pathname.split('/').includes('lobby')) return alert('You must be in a game lobby! (e.g. https://www.blooket.com/play/lobby)');
                         reactHandler().stateNode.setState({ lockedBlooks: [], takenBlooks: [] });
                     },
                     'Toggle Auto Answer': () => { autoAnswer = !autoAnswer },
                     'Toggle Highlight Answers': () => { highlightAnswers = !highlightAnswers },
-                    'Spam Open Boxes': () => {
-                        let box = prompt(`Which box do you want to open? (e.g. Space)`);
-                        let boxes = {
-                            safari: 25,
-                            aquatic: 20,
-                            bot: 20,
-                            space: 20,
-                            breakfast: 15,
-                            medieval: 15,
-                            wonderland: 15
-                        }
-                        if (!Object.keys(boxes).includes(box.toLowerCase())) return alert('I could not find that box!');
-                        let amount = prompt('How many boxes do you want to open?');
-                        fetch("https://api.blooket.com/api/users", { credentials: "include" }).then(x => x.json()).then(x => {
-                            if (x.tokens < boxes[box.toLowerCase()] * amount) amount = Math.floor(x.tokens / boxes[box.toLowerCase()]);
-                            if (!amount) return alert('You do not have enough tokens!');
-                            let wait = ms => new Promise(r => setTimeout(r, ms));
-                            getValues().then(async e => {
-                                let error = false,
-                                    blooks = [];
-                                for (let i = 0; i < amount; i++) {
-                                    fetch("https://api.blooket.com/api/users/unlockblook", {
-                                        method: "put",
-                                        credentials: "include",
-                                        headers: {
-                                            "content-type": "application/json",
-                                            "X-Blooket-Build": e.blooketBuild
-                                        },
-                                        body: await encodeValues({
-                                            name: x.name,
-                                            box: box.charAt(0).toUpperCase() + box.slice(1).toLowerCase()
-                                        }, e.secret)
-                                    }).then(async x => {
-                                        let blook = await x.json();
-                                        blooks.push(blook.unlockedBlook);
-                                        alert(`${blook.unlockedBlook} (${i + 1}/${amount})`);
-                                    }).catch(() => { error = true });
-                                    await wait(750);
-                                    if (error) break;
-                                }
-                                let count = {};
-                                blooks.forEach(blook => { count[blook] = (count[blook] || 0) + 1 });
-                                alert(`Results:\n` + Object.entries(count).map((x) => `    ${x[1]} ${x[0]}`).join(`\n`));
-                            }).catch(() => alert('There was an error encoding requests!'));
-                        }).catch(() => alert('There was an error getting username!'));
-                    },
-                    'Auto Sell Dupes': () => {
-                        fetch("https://api.blooket.com/api/users", { credentials: "include" }).then(x => x.json()).then(x => {
-                            let blooks = Object.entries(x.unlocks).map(x => [x[0], x[1] - 1]).filter(x => x[1] > 0);
-                            let wait = ms => new Promise(r => setTimeout(r, ms));
-                            getValues().then(async e => {
-                                let error = false;
-                                alert('Selling duplicate blooks, please wait');
-                                for (let [blook, numSold] of blooks) {
-                                    fetch("https://api.blooket.com/api/users/sellblook", {
-                                        method: "put",
-                                        credentials: "include",
-                                        headers: {
-                                            "content-type": "application/json",
-                                            "X-Blooket-Build": e.blooketBuild
-                                        },
-                                        body: await encodeValues({
-                                            name: x.name,
-                                            blook,
-                                            numSold
-                                        }, e.secret)
-                                    }).catch(() => { error = true });
-                                    await wait(750);
-                                    if (error) break;
-                                }
-                                alert(`Results:\n` + blooks.map((x) => `    ${x[1]} ${x[0]}`).join(`\n`));
-                            }).catch(() => alert('There was an error encoding requests!'));
-                        }).catch(() => alert('There was an error getting user data!'));
-                    },
+                    
                     'Check For Game': () => {
                         GUI.remove();
                         clearInterval(loop);
